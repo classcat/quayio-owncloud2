@@ -2,11 +2,12 @@ FROM ubuntu:trusty
 MAINTAINER ClassCat Co.,Ltd. <support@classcat.com>
 
 ########################################################################
-# ClassCat/OwnCloud Dockerfile
+# ClassCat/OwnCloud2 Dockerfile
 #   Maintained by ClassCat Co.,Ltd ( http://www.classcat.com/ )
 ########################################################################
 
 #--- HISTORY -----------------------------------------------------------
+# 29-may-15 : owncloud2, using initdb.sh
 # 28-may-15 : 8.0.3 and php5-common, which includes php5enmod.
 # 23-may-15 : quay.io.
 # 19-may-15 : trusty.
@@ -46,7 +47,8 @@ RUN apt-get install -y bzip2 \
   && sed -i.bak2 -e "s/^;always_populate_raw_post_data =.*$/always_populate_raw_post_data = -1/" /etc/php5/apache2/php.ini
 
 WORKDIR /opt
-COPY assets/cc-init.sh /opt/cc-init.sh
+COPY assets/cc-init.sh   /opt/bin/cc-init.sh
+COPY assets/cc-initdb.sh /opt/bin/cc-initdb.sh
 
 EXPOSE 22 80 443
 
