@@ -6,6 +6,7 @@
 ########################################################################
 
 #--- HISTORY 2 ---------------------------------------------------------
+# 19-jun-15 : for start method.
 # 29-may-15 : owncloud2
 #
 #--- HISTORY -----------------------------------------------------------
@@ -55,6 +56,11 @@ function put_public_key() {
 #############
 
 function save_env_for_config_mysql () {
+  if [ -e /opt/env.sh ]; then
+    echo "ClassCat Warning >> /opt/env.sh found, then skip configuration."
+    return
+  fi
+
   echo "export MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}"  > /opt/env.sh
   echo "export MYSQL_OC_DBNAME=${MYSQL_OC_DBNAME}"         >> /opt/env.sh
   echo "export MYSQL_OC_USERNAME=${MYSQL_OC_USERNAME}"     >> /opt/env.sh
@@ -85,6 +91,11 @@ function config_owncloud () {
 # See http://docs.docker.com/articles/using_supervisord/
 
 function proc_supervisor () {
+  if [ -e /etc/supervisor/conf.d/supervisord.conf ]; then
+    echo "ClassCat Warning >> /etc/supervisor/conf.d/supervisord.conf found, then skip configuration."
+    return
+  fi
+
   cat > /etc/supervisor/conf.d/supervisord.conf <<EOF
 [program:ssh]
 command=/usr/sbin/sshd -D
@@ -104,7 +115,14 @@ init
 change_root_password
 put_public_key
 save_env_for_config_mysql
-config_owncloud
+
+if [ -e /opt/cc-init_done ]; then
+  echo "ClassCat Warning >> /opt/cc-init_done found, then skip wp configuration."
+else
+  config_owncloud
+  touch /opt/cc-init_done
+fi
+
 proc_supervisor
 
 exit 0
