@@ -7,6 +7,7 @@ MAINTAINER ClassCat Co.,Ltd. <support@classcat.com>
 ########################################################################
 
 #--- HISTORY -----------------------------------------------------------
+# 19-jun-15 : call cc-initdb.sh
 # 29-may-15 : owncloud2, using initdb.sh
 # 28-may-15 : 8.0.3 and php5-common, which includes php5enmod.
 # 23-may-15 : quay.io.
@@ -23,6 +24,8 @@ RUN apt-get update && apt-get -y upgrade \
   && apt-get install -y openssh-server supervisor rsyslog mysql-client \
     apache2 php5 php5-common php5-mysql php5-mcrypt php5-intl \
     php5-gd php5-json php5-curl php5-imagick libapache2-mod-php5 \
+  && apt-get install -y bzip2 \
+  && apt-get clean \
   && mkdir -p /var/run/sshd \
   && sed -i.bak -e "s/^PermitRootLogin\s*.*$/PermitRootLogin yes/" /etc/ssh/sshd_config
 # RUN sed -i -e 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config
@@ -34,9 +37,7 @@ RUN php5enmod mcrypt \
 && sed -i     -e "s/^;default_charset =.*$/default_charset = \"UTF-8\"/"   /etc/php5/apache2/php.ini
 
 WORKDIR /usr/local
-RUN apt-get install -y bzip2 \
-  && apt-get clean \
-  && wget https://download.owncloud.org/community/owncloud-8.0.3.tar.bz2 \
+RUN wget https://download.owncloud.org/community/owncloud-8.0.3.tar.bz2 \
   && tar xfj owncloud-8.0.3.tar.bz2 \
   && mv /var/www/html /var/www/html.orig \
   && cp -r owncloud /var/www/html \
@@ -52,4 +53,5 @@ COPY assets/cc-initdb.sh /opt/bin/cc-initdb.sh
 
 EXPOSE 22 80 443
 
-CMD /opt/bin/cc-init.sh; /usr/bin/supervisord -c /etc/supervisor/supervisord.conf
+CMD /opt/bin/cc-init.sh; /opt/bin/cc-initdb.sh; /usr/bin/supervisord -c /etc/supervisor/supervisord.conf
+#CMD /opt/bin/cc-init.sh; /usr/bin/supervisord -c /etc/supervisor/supervisord.conf
